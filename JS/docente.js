@@ -15,6 +15,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     sidebarButtons.forEach(button => {
         button.addEventListener("click", (event) => {
+            const targetId = button.getAttribute("href");
+            if (targetId && !targetId.startsWith('#')) {
+                return; // Permitir navegación a otros archivos php
+            }
             event.preventDefault();
 
             if (navMenu && navMenu.classList.contains("active")) {
