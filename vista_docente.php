@@ -72,6 +72,12 @@ $usuarioNombre = $_SESSION["usuario"]["cNombres"] ?? "Docente";
                         </a>
                     </li>
                     <li>
+                        <a href="parasitos.php" class="sidebar-btn">
+                            <i class="fas fa-bug sidebar-icon"></i>
+                            <span>Parásitos</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="#panel-familias" class="sidebar-btn">
                             <i class="fas fa-sitemap sidebar-icon"></i>
                             <span>Familias</span>
