@@ -21,8 +21,7 @@ if ($grupo <= 0) {
 try {
     $stmt = $conn->prepare("SELECT tCodigo, cConstValor, cConstDescripcion FROM constante WHERE nConstGrupo = ? ORDER BY cConstDescripcion ASC");
     $stmt->execute([$grupo]);
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);   
     echo json_encode(["status" => "ok", "data" => $result]);
 } catch (Exception $e) {
     echo json_encode(["status" => "error", "message" => "Error en la operación: " . $e->getMessage()]);
