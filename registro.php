@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $apellido_materno = trim($_POST["apellido_materno"] ?? "");
     $correo = trim($_POST["correo"] ?? "");
     $raw_password = $_POST["password"] ?? "";
-    $rol = 1; // Estudiante por defecto
+    $rol = 2; // Docente por defecto
 
     if (empty($dni) || empty($nombres) || empty($apellido_paterno) || empty($correo) || empty($raw_password)) {
         $mensajeAlerta = [
