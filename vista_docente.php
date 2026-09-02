@@ -75,6 +75,9 @@ $usuarioNombre = $_SESSION["usuario"]["cNombres"] ?? "Docente";
                         <a href="hongos.php" class="sidebar-btn">
                             <i class="fas fa-mushroom sidebar-icon" style="font-family: 'Font Awesome 6 Free'; font-weight: 900; font-style: normal;">🍄</i>
                             <span>Hongos</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="parasitos.php" class="sidebar-btn">
                             <i class="fas fa-bug sidebar-icon"></i>
                             <span>Parásitos</span>

@@ -11,6 +11,8 @@ if (!$usuarioId || $usuarioId <= 0 || ($usuarioRol !== 2 && $usuarioRol !== 3)) 
     exit;
 }
 
+$mCodigo = isset($_POST['mCodigo']) ? intval($_POST['mCodigo']) : 0;
+
 // Campos libres
 $mNombreComun = trim($_POST['mNombreComun'] ?? '');
 $mNombreCientifico = trim($_POST['mNombreCientifico'] ?? '');
@@ -101,30 +103,69 @@ try {
         $mColoracion = $_POST['mColoracion'];
     }
 
-    // Insertar el microorganismo de tipo Hongo
-    $sql = "INSERT INTO microorganismo (
-                mTipo, mNombreComun, mNombreCientifico, mMuestra, mColoracion, mFoto,
-                fkDominio, fkReino, fkFilo, fkSubfilo, fkSuperclase, fkClase, fkSubclase,
-                fkOrden, fkFamilia, fkGenero, fkEspecie
-            ) VALUES (
-                'Hongo', ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?
-            )";
-    
-    $stmtMicro = $conn->prepare($sql);
-    $stmtMicro->execute([
-        $mNombreComun !== '' ? $mNombreComun : null,
-        $mNombreCientifico !== '' ? $mNombreCientifico : null,
-        $mMuestra !== '' ? $mMuestra : null,
-        $mColoracion !== '' ? $mColoracion : null,
-        $mFoto,
-        $fkDominio, $fkReino, $fkFilo, $fkSubfilo, $fkSuperclase, $fkClase, $fkSubclase,
-        $fkOrden, $fkFamilia, $fkGenero, $fkEspecie
-    ]);
+    // Determinar tabla destino (`microorganismo` o `hongo`)
+    $tablaDestino = "microorganismo";
+    $tableCheck = $conn->query("SHOW TABLES LIKE 'microorganismo'")->fetch();
+    if (!$tableCheck) {
+        $tableCheckHongo = $conn->query("SHOW TABLES LIKE 'hongo'")->fetch();
+        if ($tableCheckHongo) {
+            $tablaDestino = "hongo";
+        }
+    }
+
+    if ($mCodigo > 0) {
+        // Actualizar registro existente
+        $sqlFoto = $mFoto ? ", mFoto = ?" : "";
+        $sql = "UPDATE {$tablaDestino} SET 
+                    mNombreComun = ?, mNombreCientifico = ?, mMuestra = ?, mColoracion = ?,
+                    fkDominio = ?, fkReino = ?, fkFilo = ?, fkSubfilo = ?, fkSuperclase = ?,
+                    fkClase = ?, fkSubclase = ?, fkOrden = ?, fkFamilia = ?, fkGenero = ?, fkEspecie = ?
+                    {$sqlFoto}
+                WHERE mCodigo = ?";
+        
+        $params = [
+            $mNombreComun !== '' ? $mNombreComun : null,
+            $mNombreCientifico !== '' ? $mNombreCientifico : null,
+            $mMuestra !== '' ? $mMuestra : null,
+            $mColoracion !== '' ? $mColoracion : null,
+            $fkDominio, $fkReino, $fkFilo, $fkSubfilo, $fkSuperclase, $fkClase, $fkSubclase,
+            $fkOrden, $fkFamilia, $fkGenero, $fkEspecie
+        ];
+        if ($mFoto) {
+            $params[] = $mFoto;
+        }
+        $params[] = $mCodigo;
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+        $mensaje = "Hongo actualizado correctamente.";
+    } else {
+        // Insertar nuevo microorganismo de tipo Hongo
+        $sql = "INSERT INTO {$tablaDestino} (
+                    mTipo, mNombreComun, mNombreCientifico, mMuestra, mColoracion, mFoto,
+                    fkDominio, fkReino, fkFilo, fkSubfilo, fkSuperclase, fkClase, fkSubclase,
+                    fkOrden, fkFamilia, fkGenero, fkEspecie
+                ) VALUES (
+                    'Hongo', ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?
+                )";
+        
+        $stmtMicro = $conn->prepare($sql);
+        $stmtMicro->execute([
+            $mNombreComun !== '' ? $mNombreComun : null,
+            $mNombreCientifico !== '' ? $mNombreCientifico : null,
+            $mMuestra !== '' ? $mMuestra : null,
+            $mColoracion !== '' ? $mColoracion : null,
+            $mFoto,
+            $fkDominio, $fkReino, $fkFilo, $fkSubfilo, $fkSuperclase, $fkClase, $fkSubclase,
+            $fkOrden, $fkFamilia, $fkGenero, $fkEspecie
+        ]);
+        $mensaje = "Hongo guardado correctamente.";
+    }
 
     $conn->commit();
-    echo json_encode(["status" => "ok", "message" => "Hongo guardado correctamente."]);
+    echo json_encode(["status" => "ok", "message" => $mensaje]);
 } catch (Exception $e) {
     $conn->rollBack();
     echo json_encode(["status" => "error", "message" => "Error al guardar el hongo: " . $e->getMessage()]);
